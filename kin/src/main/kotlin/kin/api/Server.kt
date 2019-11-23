@@ -9,6 +9,7 @@ import io.netty.handler.codec.http.HttpServerCodec
 import io.netty.handler.codec.http.router.Router
 import io.netty.handler.stream.ChunkedWriteHandler
 import kin.internal.BossEventLoopGroup
+import kin.internal.DefaultNotFoundHandler
 import kin.internal.ServerInboundHandler
 import kin.internal.WorkerEventLoopGroup
 import mu.KotlinLogging
@@ -17,7 +18,9 @@ import java.net.InetSocketAddress
 class Server(private val port: Int = 7777) {
 
     private val logger = KotlinLogging.logger {}
-    private val router = Router<Handler>()
+    private val router = Router<Handler>().apply {
+        notFound(DefaultNotFoundHandler())
+    }
 
     fun start() {
         val bootstrap = ServerBootstrap()

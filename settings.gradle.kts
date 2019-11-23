@@ -1,1 +1,1 @@
-include("kin")
+include("kin","setty")

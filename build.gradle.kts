@@ -9,6 +9,7 @@ allprojects {
 
     repositories {
         jcenter()
+        mavenCentral()
     }
 }
 

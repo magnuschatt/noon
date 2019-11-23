@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
+    implementation(project(":kin"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2")
     implementation("io.netty:netty-all:4.1.43.Final")
@@ -23,7 +23,7 @@ dependencies {
 
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions.jvmTarget = "1.8"
-val mainClass = "kin.example.MainServerKt"
+val mainClass = "setty.MainKt"
 
 application {
     // Define the main class for the application.
@@ -31,7 +31,7 @@ application {
 }
 
 tasks.withType<Jar> {
-    archiveFileName.set("kin.jar")
+    archiveFileName.set("setty.jar")
     manifest {
         attributes(mapOf(
                 "Main-Class" to mainClass
@@ -41,5 +41,5 @@ tasks.withType<Jar> {
 
 tasks.register("dockerBuild", Exec::class) {
     dependsOn("shadowJar")
-    commandLine = "docker build -t kin .".split(" ")
+    commandLine = "docker build -t setty .".split(" ")
 }

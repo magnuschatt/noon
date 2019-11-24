@@ -2,3 +2,5 @@
 .idea
 build
 kin/build
+setty/build
+poky/build

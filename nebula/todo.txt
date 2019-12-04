@@ -1,0 +1,15 @@
+read in goal state from yaml file
+read in world state from docker cli
+stop docker containers in excess
+start missing docker containers to reach goal state
+
+example goal state:
+
+services:
+    - poky:
+        image: poky
+        count: 10
+    - setty:
+        image: setty
+        count: 30
+

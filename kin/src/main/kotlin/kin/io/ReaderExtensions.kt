@@ -10,9 +10,13 @@ suspend fun Reader.readToString(): String {
     return stringWriter.toString()
 }
 
-suspend fun Reader.copyTo(writer: Writer) {
+suspend fun Reader.copyTo(writer: Writer, close: Boolean = false) {
     for (bytes in this) {
         writer.write(bytes)
+    }
+
+    if (close) {
+        writer.write(null)
     }
 }
 

@@ -19,3 +19,6 @@ dependencies {
     }
 }
 
+tasks.clean {
+    delete("temp")
+}

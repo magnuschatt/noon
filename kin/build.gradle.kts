@@ -23,7 +23,7 @@ dependencies {
 
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions.jvmTarget = "1.8"
-val mainClass = "kin.example.MainServerKt"
+val mainClass = "${project.name}.MainKt"
 
 application {
     // Define the main class for the application.
@@ -31,7 +31,7 @@ application {
 }
 
 tasks.withType<Jar> {
-    archiveFileName.set("kin.jar")
+    archiveFileName.set("${project.name}.jar")
     manifest {
         attributes(mapOf(
                 "Main-Class" to mainClass
@@ -41,5 +41,5 @@ tasks.withType<Jar> {
 
 tasks.register("dockerBuild", Exec::class) {
     dependsOn("shadowJar")
-    commandLine = "docker build -t kin .".split(" ")
+    commandLine = "docker build -t ${project.name} .".split(" ")
 }

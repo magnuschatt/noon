@@ -1,5 +1,6 @@
 package kin.api
 
+import io.netty.buffer.ByteBufAllocator
 import io.netty.handler.codec.http.*
 import kin.io.EmptyReader
 import kin.io.Reader
@@ -12,6 +13,8 @@ class Request(val method: HttpMethod,
               val pathParams: Map<String, String> = emptyMap(),
               val httpVersion: HttpVersion = HttpVersion.HTTP_1_1,
               val headers: HttpHeaders = DefaultHttpHeaders()) {
+
+    var alloc: ByteBufAllocator? = null
 
     constructor(method: HttpMethod,
                 uriString: String,

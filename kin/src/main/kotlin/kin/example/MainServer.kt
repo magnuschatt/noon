@@ -8,20 +8,20 @@ import kin.io.writeString
 
 fun main() {
     val server = Kin.server(port = 7777)
-    server.route(HttpMethod.GET, "/hello") { req, resp ->
+    server.route(HttpMethod.GET, "/hello") { ctx ->
         val content = mutableListOf<String>()
         content += "Hello Kin!"
         content += "You sent us this request:"
-        content += "${req.method} ${req.uri} ${req.httpVersion}"
-        content += req.headers.map { (k, v) -> "$k: $v" }
+        content += "${ctx.request.method} ${ctx.request.uri} ${ctx.request.httpVersion}"
+        content += ctx.request.headers.map { (k, v) -> "$k: $v" }
         content += ""
-        content += req.body.readToString()
+        content += ctx.request.body.readToString()
         content += ""
         val contentString = content.joinToString(separator = "\n")
 
-        resp.headers["Content-Length"] = contentString.length.toString()
-        resp.status = HttpResponseStatus.OK
-        resp.body.writeString(contentString)
+        ctx.response.headers["Content-Length"] = contentString.length.toString()
+        ctx.response.status = HttpResponseStatus.OK
+        ctx.response.body.writeString(contentString)
     }
 
     server.start()

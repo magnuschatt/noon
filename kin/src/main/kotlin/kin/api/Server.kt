@@ -34,10 +34,10 @@ class Server(private val port: Int = 7777) {
         ch.closeFuture().sync()
     }
 
-    fun route(method: HttpMethod, pathPattern: String, handler: suspend (Request, ResponseWriter) -> Unit) {
+    fun route(method: HttpMethod, pathPattern: String, handler: suspend (Context) -> Unit) {
         route(method, pathPattern, object : Handler {
-            override suspend fun handle(request: Request, response: ResponseWriter) {
-                handler(request, response)
+            override suspend fun handle(ctx: Context) {
+                handler(ctx)
             }
         })
     }

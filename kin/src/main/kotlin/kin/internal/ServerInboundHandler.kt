@@ -4,12 +4,16 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.codec.http.*
+import io.netty.handler.codec.http.HttpHeaderNames.EXPECT
+import io.netty.handler.codec.http.HttpVersion.HTTP_1_1
 import io.netty.handler.codec.http.router.Router
 import io.netty.handler.stream.ChunkedWriteHandler
+import kin.api.Context
 import kin.api.Handler
 import kin.api.Request
 import kin.api.ResponseWriter
 import kin.io.ChannelReader
+import kin.io.ChannelWriter
 import kin.io.ChunkedInputWriter
 import kin.io.OnFirstWriteWrapper
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +26,7 @@ import java.net.URI
 
 class ServerInboundHandler(private val router: Router<Handler>) : SimpleChannelInboundHandler<HttpObject>(false) {
 
-    private val channel = Channel<ByteBuf>(Channel.UNLIMITED)
+    private val channel = Channel<ByteBuf>(1)
 
     override fun channelRead0(ctx: ChannelHandlerContext, msg: HttpObject) {
         when (msg) {
@@ -42,8 +46,13 @@ class ServerInboundHandler(private val router: Router<Handler>) : SimpleChannelI
     }
 
     private fun readHttpRequest(ctx: ChannelHandlerContext, msg: HttpRequest) {
+
+        if (msg.headers()[EXPECT] == "100-continue") {
+            ctx.writeAndFlush(DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.CONTINUE))
+        }
+
         GlobalScope.launch(Dispatchers.Default) {
-            val httpResponse = DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+            val httpResponse = DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.OK)
             val cwh = ctx.channel().pipeline()[ChunkedWriteHandler::class.java]
             val chunkedInputWriter = ChunkedInputWriter(cwh)
             val writer = OnFirstWriteWrapper(chunkedInputWriter) {
@@ -65,7 +74,8 @@ class ServerInboundHandler(private val router: Router<Handler>) : SimpleChannelI
                     headers = msg.headers()
             )
             val response = ResponseWriter(httpResponse, writer)
-            route.target().handle(request, response)
+            val context = Context(request, response, ctx.alloc())
+            route.target().handle(context)
             writer.write(null)
         }
     }

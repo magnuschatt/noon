@@ -1,1 +1,1 @@
-include("kin","setty", "poky", "nebula")
+include("kin","setty", "poky", "nebula", "mantle")

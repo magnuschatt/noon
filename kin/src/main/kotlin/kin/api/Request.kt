@@ -14,8 +14,6 @@ class Request(val method: HttpMethod,
               val httpVersion: HttpVersion = HttpVersion.HTTP_1_1,
               val headers: HttpHeaders = DefaultHttpHeaders()) {
 
-    var alloc: ByteBufAllocator? = null
-
     constructor(method: HttpMethod,
                 uriString: String,
                 body: Reader = EmptyReader()) : this(method, URI(uriString), body)

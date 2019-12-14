@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("org.jetbrains.kotlin.jvm") version "1.3.50"
     id("com.github.johnrengelman.shadow") version "5.2.0"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.3.60"
     application
 }
 
@@ -14,6 +15,8 @@ dependencies {
     implementation("tv.cntt:netty-router:2.2.0")
     implementation("io.github.microutils:kotlin-logging:1.7.8")
     implementation("com.github.docker-java:docker-java:3.1.5")
+    implementation("com.charleskorn.kaml:kaml:0.15.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.14.0")
 
     runtimeOnly("ch.qos.logback:logback-classic:1.2.3")
     runtimeOnly("org.slf4j:log4j-over-slf4j:1.7.29")

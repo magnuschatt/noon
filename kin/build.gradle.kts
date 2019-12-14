@@ -23,7 +23,7 @@ dependencies {
 
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions.jvmTarget = "1.8"
-val mainClass = "${project.name}.MainKt"
+val mainClass = "${project.name}.example.MainServerKt"
 
 application {
     // Define the main class for the application.

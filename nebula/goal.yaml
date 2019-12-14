@@ -1,0 +1,9 @@
+services:
+  mantle:
+    image: mantle
+    httpPort: 7799
+    count: 3
+  onix:
+    image: onix
+    httpPort: 7770
+    count: 5

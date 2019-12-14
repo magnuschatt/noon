@@ -9,7 +9,7 @@ import kotlinx.coroutines.runBlocking
 fun main() = runBlocking {
     val client = Kin.client()
     val content = "this is the body"
-    val request = Request(GET, "http://localhost:7777/hello", content)
+    val request = Request(GET, "http://host:7788/hello", content)
     request.headers["Transfer-Encoding"] = "chunked"
     request.headers["hello"] = "world"
     val response = client.execute(request)

@@ -36,9 +36,10 @@ class Client {
     suspend fun execute(request: Request): Response {
         val uri = request.uri
         val ch = bootstrap.connect(uri.host, uri.port).suspend().channel()
+        val cwh = ch.pipeline()[ChunkedWriteHandler::class.java]
+        val clientHandler = ch.pipeline()[ClientInboundHandler::class.java]
         val nr = DefaultHttpRequest(HttpVersion.HTTP_1_1, request.method, uri.rawPath)
         nr.headers().setAll(request.headers)
-        val cwh = ch.pipeline()[ChunkedWriteHandler::class.java]
         val chunkedInputWriter = ChunkedInputWriter(cwh)
         ch.write(nr)
         ch.writeAndFlush(HttpChunkedInput(chunkedInputWriter))
@@ -46,7 +47,6 @@ class Client {
         request.body.copyTo(chunkedInputWriter)
         chunkedInputWriter.write(null)
 
-        val clientHandler = ch.pipeline()[ClientInboundHandler::class.java]
         val httpResponse = clientHandler.httpResponse.await()
         val responseBody = ChannelReader(clientHandler.channel)
         ch.closeFuture().suspend()

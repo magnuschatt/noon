@@ -24,9 +24,10 @@ fun check() = runBlocking {
     try {
         val key = abs(Random.nextInt()).toString()
         val value = abs(Random.nextInt()).toString()
-        val url = "http://localhost:7788/poky/$key"
+        val url = "http://tunnel:3333/poky/$key"
 
         val set = Request(HttpMethod.PUT, url, value)
+        set.headers["x-svc"] = "setty"
         set.headers[CONTENT_LENGTH] = value.length
         val setResp = client.execute(set)
         if (setResp.status != HttpResponseStatus.OK) {
@@ -35,6 +36,7 @@ fun check() = runBlocking {
         }
 
         val get = Request(HttpMethod.GET, url)
+        get.headers["x-svc"] = "setty"
         val getResp = client.execute(get)
         if (getResp.status != HttpResponseStatus.OK) {
             println("FAIL! Get returned status ${getResp.status}")

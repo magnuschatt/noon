@@ -42,7 +42,7 @@ class Server(private val port: Int = 7777) {
         })
     }
 
-    private fun route(method: HttpMethod, pathPattern: String, handler: Handler) {
+    fun route(method: HttpMethod, pathPattern: String, handler: Handler) {
         router.addRoute(method, pathPattern, handler)
     }
 

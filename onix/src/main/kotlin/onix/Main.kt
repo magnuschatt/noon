@@ -8,7 +8,7 @@ import kin.api.Response
 import kin.io.copyTo
 import kotlinx.coroutines.runBlocking
 
-const val mantleHost = "http://localhost:7799"
+const val mantleHost = "http://host:7799"
 val client = Kin.client()
 
 fun main() = runBlocking {

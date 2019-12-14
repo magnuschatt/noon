@@ -12,6 +12,7 @@ import com.github.dockerjava.jaxrs.JerseyDockerCmdExecFactory
 import io.netty.channel.nio.NioEventLoopGroup
 import kin.api.Kin
 import kotlinx.serialization.Serializable
+import nebula.docker.dockerClient
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -27,20 +28,6 @@ val eventLoopGroup = NioEventLoopGroup()
 val goalFile = File("nebula/goal.yaml")
 val goalStateFile = Yaml.default.parse(GoalStateFile.serializer(), goalFile.readText())
 
-val config: DefaultDockerClientConfig = DefaultDockerClientConfig.createDefaultConfigBuilder()
-        .withDockerHost("tcp://localhost:2375")
-        .build()
-
-val dockerCmdExecFactory: JerseyDockerCmdExecFactory = JerseyDockerCmdExecFactory()
-        .withReadTimeout(1000)
-        .withConnectTimeout(1000)
-        .withMaxTotalConnections(100)
-        .withMaxPerRouteConnections(10)
-
-val client: DockerClient = DockerClientBuilder.getInstance(config)
-        .withDockerCmdExecFactory(dockerCmdExecFactory)
-        .build()
-
 fun main() {
     if (!goalFile.exists()) {
         goalFile.parentFile.mkdirs()
@@ -52,7 +39,7 @@ fun main() {
 fun check() {
     val goalStateFile = Yaml.default.parse(GoalStateFile.serializer(), goalFile.readText())
 
-    val containers = client.listContainersCmd()
+    val containers = dockerClient.listContainersCmd()
             .withShowAll(true)
             .exec()
 
@@ -69,13 +56,13 @@ fun check() {
             val portBinding = PortBinding(Ports.Binding.bindPort(0), exposedPort)
             val hostConfig = HostConfig.newHostConfig().withPortBindings(portBinding)
 
-            val create = client.createContainerCmd(service.image)
+            val create = dockerClient.createContainerCmd(service.image)
                     .withName(containerName)
                     .withExposedPorts(exposedPort)
                     .withHostConfig(hostConfig)
                     .exec()
 
-            val resp = client.startContainerCmd(create.id).exec()
+            val resp = dockerClient.startContainerCmd(create.id).exec()
             println(resp)
         }
     }

@@ -17,19 +17,14 @@ fun main() = runBlocking {
     val server = Kin.server(7788)
 
     server.route(PUT, "/:*") { ctx ->
-        if (Random.nextInt(100) < 20) {
-            ctx.response.status = HttpResponseStatus.SERVICE_UNAVAILABLE
-        } else {
-            cache.set(key = ctx.request.uri.path, value = ctx.request.body.readToString())
-            ctx.response.status = HttpResponseStatus.OK
-        }
+        cache.set(key = ctx.request.uri.path, value = ctx.request.body.readToString())
+        ctx.response.status = HttpResponseStatus.OK
     }
 
     server.route(GET, "/:*") { ctx ->
         val value = cache.get(key = ctx.request.uri.path)
-        if (Random.nextInt(100) < 20) {
-            ctx.response.status = HttpResponseStatus.SERVICE_UNAVAILABLE
-        } else if (value == null) {
+        ctx.response.headers[CONTENT_LENGTH] = 0
+        if (value == null) {
             ctx.response.status = HttpResponseStatus.NOT_FOUND
         } else {
             ctx.response.headers[CONTENT_LENGTH] = value.length

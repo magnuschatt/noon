@@ -3,10 +3,7 @@ package tunnel
 import io.netty.handler.codec.http.HttpHeaderNames.CONTENT_LENGTH
 import io.netty.handler.codec.http.HttpMethod
 import io.netty.handler.codec.http.HttpResponseStatus
-import kin.api.Context
-import kin.api.Handler
-import kin.api.Kin
-import kin.api.Request
+import kin.api.*
 import kin.io.copyTo
 import kin.io.writeString
 import java.net.URI
@@ -16,19 +13,32 @@ val client = Kin.client()
 
 fun main() {
 
-    val server = Kin.server(3333)
+    val outServer = Kin.server(3333)
+    outServer.route(HttpMethod.GET, "/:*", ::handleOutbound)
+    outServer.route(HttpMethod.HEAD, "/:*", ::handleOutbound)
+    outServer.route(HttpMethod.PUT, "/:*", ::handleOutbound)
+    outServer.route(HttpMethod.POST, "/:*", ::handleOutbound)
+    outServer.route(HttpMethod.DELETE, "/:*", ::handleOutbound)
+    outServer.startAsync()
 
-    server.route(HttpMethod.GET, "/:*", ::handle)
-    server.route(HttpMethod.HEAD, "/:*", ::handle)
-    server.route(HttpMethod.PUT, "/:*", ::handle)
-    server.route(HttpMethod.POST, "/:*", ::handle)
-    server.route(HttpMethod.DELETE, "/:*", ::handle)
-
-    server.start()
+    val inServer = Kin.server(3334)
+    inServer.route(HttpMethod.GET, "/:*", ::handleInbound)
+    inServer.route(HttpMethod.HEAD, "/:*", ::handleInbound)
+    inServer.route(HttpMethod.PUT, "/:*", ::handleInbound)
+    inServer.route(HttpMethod.POST, "/:*", ::handleInbound)
+    inServer.route(HttpMethod.DELETE, "/:*", ::handleInbound)
+    inServer.start()
 
 }
 
-suspend fun handle(ctx: Context) {
+suspend fun handleInbound(ctx: Context) {
+    val port = 7788
+    val proxyRequest = proxyRequest(ctx.request, "http://service:$port")
+    val response = client.execute(proxyRequest)
+    response.copyTo(ctx.response)
+}
+
+suspend fun handleOutbound(ctx: Context) {
 
     val servicePorts = mapOf(
             "setty" to 7788,
@@ -45,16 +55,23 @@ suspend fun handle(ctx: Context) {
     }
 
     val port = servicePorts[destSvc]
-
-    val pathPart = ctx.request.uri.rawPath
-    val proxyUrl = URI("http://host:$port$pathPart")
-    val proxyRequest = Request(ctx.request.method, proxyUrl, ctx.request.body)
-    proxyRequest.headers.set(ctx.request.headers)
-    proxyRequest.headers["x-via"] = "tunnel"
+    val proxyRequest = proxyRequest(ctx.request, "http://host:$port")
     val response = client.execute(proxyRequest)
+    response.copyTo(ctx.response)
+}
 
-    ctx.response.status = response.status
-    ctx.response.headers.set(response.headers)
-    response.body.copyTo(ctx.response.body)
+fun proxyRequest(request: Request, newHost: String): Request {
+    val pathPart = request.uri.rawPath
+    val proxyUrl = URI("$newHost$pathPart")
+    val copy = Request(request.method, proxyUrl, request.body)
+    copy.headers.set(request.headers)
+    copy.headers["x-via"] = "tunnel"
+    return copy
+}
 
+suspend fun Response.copyTo(responseWriter: ResponseWriter) {
+    responseWriter.status = status
+    responseWriter.headers.set(headers)
+    responseWriter.headers["x-via"] = "tunnel"
+    body.copyTo(responseWriter.body)
 }

@@ -1,6 +1,7 @@
 package kin.api
 
 import io.netty.bootstrap.ServerBootstrap
+import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
@@ -23,6 +24,10 @@ class Server(private val port: Int = 7777) {
     }
 
     fun start() {
+        startAsync().sync()
+    }
+
+    fun startAsync(): ChannelFuture {
         val bootstrap = ServerBootstrap()
                 .group(BossEventLoopGroup, WorkerEventLoopGroup)
                 .channel(NioServerSocketChannel::class.java)
@@ -31,7 +36,7 @@ class Server(private val port: Int = 7777) {
         val address = InetSocketAddress(port)
         val ch = bootstrap.bind(address).sync().channel()
         logger.info { "Server is listening on: ${ch.localAddress()}" }
-        ch.closeFuture().sync()
+        return ch.closeFuture()
     }
 
     fun route(method: HttpMethod, pathPattern: String, handler: suspend (Context) -> Unit) {

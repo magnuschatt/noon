@@ -15,11 +15,36 @@ services:
 
 networking:
 all containers have their own bridge network
-with one other `wormhole` container in that network
-this wormhole is available on http://wormhole:5436/
-wormhole can attach auth header as it knows which service is calling
-and forward the request in the form of a https request another wormhole instance the other.
-question is: how do we indicate to the other local wormhole where we want to send the request
+with one other `tunnel` container in that network
+this tunnel is available on http://tunnel:5436/
+tunnel can attach auth header as it knows which service is calling
+and forward the request in the form of a https request another tunnel instance the other.
+question is: how do we indicate to the other local tunnel where we want to send the request
 1) via a header? no this is not convenient in some cases (but this where we will start)
-2) via a port on the wormhole instance? will run out of ports at some point
-3) via the host part of the url, like http://service.wormhole:5436/path would be great
+2) via a port on the tunnel instance? will run out of ports at some point
+3) via the host part of the url, like http://service.tunnel:5436/path would be great
+
+
+what will it look when it is running:
+
+docker ps:
+tunnel__0__setty
+0__setty
+tunnel__1__setty
+1__setty
+tunnel__2__setty
+2__setty
+tunnel__3__setty
+3__setty
+tunnel__0__poky
+0__poky
+tunnel__1__poky
+1__poky
+
+docker network ls:
+network__0__setty
+network__1__setty
+network__2__setty
+network__3__setty
+network__0__poky
+network__1__poky
